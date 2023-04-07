@@ -1,0 +1,66 @@
+package com.sankuai.avatar.workflow.core.checker.global;
+
+import com.sankuai.avatar.workflow.core.annotation.CheckerMeta;
+import com.sankuai.avatar.workflow.core.checker.CheckerRequest;
+import com.sankuai.avatar.workflow.core.checker.CheckerResponse;
+import com.sankuai.avatar.workflow.core.checker.CheckerResult;
+import com.sankuai.avatar.workflow.core.checker.response.AcceptResponse;
+import com.sankuai.avatar.workflow.core.checker.response.RejectResponse;
+import com.sankuai.avatar.workflow.core.client.lock.FlowLockClient;
+import com.sankuai.avatar.workflow.core.client.lock.request.FlowLockRequest;
+import com.sankuai.avatar.workflow.core.client.lock.response.FlowLockResponse;
+import com.sankuai.avatar.workflow.core.context.FlowContext;
+import com.sankuai.avatar.workflow.core.context.FlowTemplateName;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+/**
+ * 流程限流
+ * 前端页面提交，限制相同流程 2 分钟内不能重复提交
+ *
+ * @author zhaozhifan02
+ */
+@Slf4j
+@CheckerMeta(name = "流程限流",
+        description = "流程限流",
+        checkAppkeyUser = false,
+        blackFlowList = {FlowTemplateName.DELEGATE_WORK,
+                FlowTemplateName.UNLOCK_DEPLOY,
+                FlowTemplateName.DELIVER_ACTIVITY_RESOURCE})
+@Component
+public class FlowLimitGlobalChecker extends AbstractGlobalChecker {
+
+    private final FlowLockClient flowLockClient;
+
+    @Autowired
+    public FlowLimitGlobalChecker(FlowLockClient flowLockClient) {
+        this.flowLockClient = flowLockClient;
+    }
+
+    @Override
+    public CheckerResult doCheck(CheckerRequest checkerRequest) {
+        FlowContext flowContext = checkerRequest.getFlowContext();
+        CheckerResult checkerResult = CheckerResult.of();
+        checkerResult.getCheckerResponseList().add(checkFlowLock(flowContext));
+        return checkerResult;
+    }
+
+    /**
+     * 检查流程是否重复
+     *
+     * @param flowContext 流程上下文
+     * @return CheckerResponse
+     */
+    private CheckerResponse checkFlowLock(FlowContext flowContext) {
+        FlowLockRequest request = FlowLockRequest.builder()
+                .flowContext(flowContext)
+                .build();
+        FlowLockResponse response = flowLockClient.validate(request);
+        // 有资源被锁定代表流程重复提交，预检拦截
+        if (response.isLocked()) {
+            return RejectResponse.ofMsg(response.getMessage());
+        }
+        return AcceptResponse.of();
+    }
+}

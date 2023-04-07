@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="info">
+    <!-- Context-wide级别  对带异常的日志进行限流,
+        如果服务的单机QPS大于260，建议使用异常日志限流。如果单机QPS比较低，使用限流的作用不大。-->
+    <!--<ExceptionLimitFilter rate="50"/>-->
+    <appenders>
+        <Console name="Console" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %t %-5level %logger{30}.%method - %msg%n" />
+        </Console>
+
+        <!--默认按天&按512M文件大小切分日志，默认最多保留30个日志文件，非阻塞模式-->
+        <XMDFile name="infoAppender" fileName="info.log" sizeBasedTriggeringSize="512M"
+                 rolloverMax="30">
+            <Filters>
+                <ThresholdFilter level="warn" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+        </XMDFile>
+
+        <XMDFile name="warnAppender" fileName="warn.log" sizeBasedTriggeringSize="512M"
+                 rolloverMax="30">
+            <Filters>
+                <ThresholdFilter level="error" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <ThresholdFilter level="warn" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+        </XMDFile>
+
+        <XMDFile name="errorAppender" fileName="error.log" sizeBasedTriggeringSize="512M"
+                 rolloverMax="30">
+            <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+        </XMDFile>
+
+        <!--日志远程上报-->
+        <AsyncScribe name="AsyncScribeAppender_com.sankuai.avatar.web" blocking="false">
+            <Property name="scribeCategory">com.sankuai.avatar.web</Property>
+            <!-- 如果要开启丢失率检测，请放开下面代码注释 -->
+            <!-- <Property name="checkLoss">true</Property> -->
+            <LcLayout/>
+        </AsyncScribe>
+
+        <CatAppender name="catAppender"/>
+        <MDPTraceAppender name="mdpTrace"/>
+    </appenders>
+
+    <loggers>
+        <!--远程日志-->
+        <logger name="logger_com.sankuai.avatar.web" level="info" additivity="false">
+            <appender-ref ref="AsyncScribeAppender_com.sankuai.avatar.web"/>
+        </logger>
+
+        <root level="info">
+            <appender-ref ref="infoAppender"/>
+            <appender-ref ref="warnAppender"/>
+            <appender-ref ref="errorAppender"/>
+            <appender-ref ref="Console" />
+            <appender-ref ref="catAppender"/>
+            <appender-ref ref="mdpTrace"/>
+        </root>
+    </loggers>
+</configuration>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <!-- thrift连接池配置 -->
+    <bean id="mtThriftPoolConfig" class="com.meituan.service.mobile.mtthrift.client.pool.MTThriftPoolConfig">
+        <property name="maxActive" value="100"/>
+        <property name="maxIdle" value="20"/>
+        <property name="minIdle" value="1"/>
+        <property name="maxWait" value="3000"/>
+        <property name="testOnBorrow" value="true"/>
+        <property name="testOnReturn" value="false"/>
+        <property name="testWhileIdle" value="false"/>
+    </bean>
+
+    <bean id="udbThriftService" class="com.meituan.service.mobile.mtthrift.proxy.ThriftClientProxy"
+          destroy-method="destroy">
+
+        <!-- 可不配置:默认maxActive=100,maxIdle=20,minIdle=5,maxWait=3000 -->
+        <property name="mtThriftPoolConfig" ref="mtThriftPoolConfig"/>
+
+        <!-- service接口名 -->
+        <property name="serviceInterface"
+                  value="com.sankuai.xm.udb.common.UdbServiceI"/>
+
+<!--        <property name="clusterManager" value="octo"/>-->
+
+        <!-- 客户端appkey，如果同时也是server的话，建议复用 -->
+        <property name="appKey" value="com.sankuai.avatar.web"/>
+
+        <!-- 服务端appkey，由服务方提供 -->
+        <property name="remoteAppkey" value="com.sankuai.xm.udb"/>
+
+        <!-- thrift rpc 超时时间（毫秒） -->
+        <property name="timeout" value="3000"/>
+    </bean>
+</beans>

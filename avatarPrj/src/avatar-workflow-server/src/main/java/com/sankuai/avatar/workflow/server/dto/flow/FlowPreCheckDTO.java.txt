@@ -1,0 +1,17 @@
+package com.sankuai.avatar.workflow.server.dto.flow;
+
+import lombok.Builder;
+import lombok.Data;
+
+import java.util.List;
+
+/**
+ * @author zhaozhifan02
+ */
+@Data
+@Builder
+public class FlowPreCheckDTO {
+    List<PreCheckItemDTO> items;
+
+    Boolean canSubmit;
+}

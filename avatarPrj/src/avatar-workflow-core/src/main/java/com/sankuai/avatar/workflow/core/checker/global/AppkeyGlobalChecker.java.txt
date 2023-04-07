@@ -1,0 +1,31 @@
+package com.sankuai.avatar.workflow.core.checker.global;
+
+import com.sankuai.avatar.resource.appkey.AppkeyResource;
+import com.sankuai.avatar.workflow.core.annotation.CheckerMeta;
+import com.sankuai.avatar.workflow.core.checker.CheckResult;
+import com.sankuai.avatar.workflow.core.context.FlowContext;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+/**
+ * appkey全局校验是否存在
+ *
+ * @author Jie.li.sh
+ * @create 2022-11-02
+ **/
+@CheckerMeta
+@Component
+public class AppkeyGlobalChecker extends AbstractGlobalChecker {
+    @Autowired
+    AppkeyResource appkeyResource;
+
+    @Override
+    public CheckResult check(FlowContext flowContext) {
+        String appkeyName = flowContext.getResource() != null? flowContext.getResource().getAppkey(): null;
+        if (StringUtils.isNotEmpty(appkeyName) && appkeyResource.getByAppkey(appkeyName) == null) {
+            return CheckResult.ofReject(String.format("appkey %s 不存在", appkeyName));
+        }
+        return CheckResult.ofAccept();
+    }
+}

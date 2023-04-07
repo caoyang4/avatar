@@ -1,0 +1,66 @@
+package com.sankuai.avatar.workflow.core.checker.global;
+
+import com.sankuai.avatar.workflow.core.annotation.CheckerMeta;
+import com.sankuai.avatar.workflow.core.checker.CheckerRequest;
+import com.sankuai.avatar.workflow.core.checker.CheckerResponse;
+import com.sankuai.avatar.workflow.core.checker.CheckerResult;
+import com.sankuai.avatar.workflow.core.checker.response.AcceptResponse;
+import com.sankuai.avatar.workflow.core.checker.response.RejectResponse;
+import com.sankuai.avatar.workflow.core.client.api.ApiCallLimitClient;
+import com.sankuai.avatar.workflow.core.client.api.request.ApiCallLimitRequest;
+import com.sankuai.avatar.workflow.core.client.api.response.ApiCallLimitResponse;
+import com.sankuai.avatar.workflow.core.context.FlowContext;
+import com.sankuai.avatar.workflow.core.context.FlowUserSource;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+/**
+ * API调用频率检查
+ *
+ * @author zhaozhifan02
+ */
+@Slf4j
+@CheckerMeta(name = "API调用频率检查", description = "API调用频率检查")
+@Component
+public class ApiCallFrequencyGlobalChecker extends AbstractGlobalChecker {
+
+    private final ApiCallLimitClient apiCallLimitClient;
+
+    @Autowired
+    public ApiCallFrequencyGlobalChecker(ApiCallLimitClient apiCallLimitClient) {
+        this.apiCallLimitClient = apiCallLimitClient;
+    }
+
+    @Override
+    public CheckerResult doCheck(CheckerRequest checkerRequest) {
+        FlowContext flowContext = checkerRequest.getFlowContext();
+        CheckerResult checkerResult = CheckerResult.of();
+        checkerResult.getCheckerResponseList().add(checkApiFrequencyLimit(flowContext));
+        return checkerResult;
+    }
+
+    @Override
+    public Boolean shouldSkip(CheckerRequest checkerRequest) {
+        FlowContext flowContext = checkerRequest.getFlowContext();
+        return FlowUserSource.USER.equals(flowContext.getCreateUserSource());
+    }
+
+    /**
+     * 检查API用户接口调用频率限制
+     *
+     * @param flowContext 流程上下文
+     * @return CheckerResponse
+     */
+    private CheckerResponse checkApiFrequencyLimit(FlowContext flowContext) {
+        ApiCallLimitRequest request = ApiCallLimitRequest.builder()
+                .flowContext(flowContext)
+                .build();
+        ApiCallLimitResponse response = apiCallLimitClient.validate(request);
+        // 有资源被锁定代表调用超过频率限制，预检拦截
+        if (response.isLocked()) {
+            return RejectResponse.ofMsg(response.getMessage());
+        }
+        return AcceptResponse.of();
+    }
+}

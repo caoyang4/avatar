@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>avatar</artifactId>
+        <groupId>com.sankuai.avatar</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>avatar-resource-collect</artifactId>
+    <dependencies>
+        <!--avatar内部module-->
+        <dependency>
+            <groupId>com.sankuai.avatar</groupId>
+            <artifactId>avatar-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sankuai.avatar</groupId>
+            <artifactId>avatar-dao</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sankuai.avatar</groupId>
+            <artifactId>avatar-resource</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>elasticsearch</artifactId>
+                    <groupId>org.elasticsearch</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- 一个用于比较两个对象的所有属性是否全部相等，并且可以获取所有不相等的属性的比对器 -->
+        <dependency>
+            <groupId>com.github.dadiyang</groupId>
+            <artifactId>equator</artifactId>
+            <version>1.0.4</version>
+        </dependency>
+        <!-- powermock mock测试 -->
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-junit4</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito2</artifactId>
+        </dependency>
+    </dependencies>
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+    </properties>
+    
+</project>

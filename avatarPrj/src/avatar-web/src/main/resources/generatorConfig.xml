@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+
+    <context id="goods" targetRuntime="MyBatis3">
+        <!-- 生成的entity实体引入lombok注解 Getter,Setter,Builder -->
+        <plugin type="com.meituan.mdp.mybatis.generator.plugins.LombokPlugin"/>
+        <!--生成通用sql方法类，包含通用方法。共MdpMapperPlugin、MdpSimpleMapperPlugin、MdpMixedMapperPlugin
+        3个插件，根据诉求决定使用哪个插件，具体区别见 https://docs.sankuai.com/dp/hbar/mdp-docs/master/mbg/ -->
+        <plugin type="com.meituan.mdp.mybatis.generator.plugins.MdpMapperPlugin"/>
+        <!--<plugin type="com.meituan.mdp.mybatis.generator.plugins.MdpSimpleMapperPlugin"/>-->
+        <!--<plugin type="com.meituan.mdp.mybatis.generator.plugins.MdpMixedMapperPlugin"/>-->
+        <!-- 每次执行插件生成的 xml 时通用的方法会覆盖的 -->
+        <plugin type="org.mybatis.generator.plugins.UnmergeableXmlMappersPlugin"/>
+        <!-- 生成批量插入方法插件，默认不需要，需要时配置此插件。使用条件：
+        Context targetRuntime="Mybatis3" ; javaClientGenerator type="XMLMAPPER、MIXEDMAPPER"-->
+        <plugin type="com.meituan.mdp.mybatis.generator.plugins.BatchInsertPlugin"/>
+        <!--分页插件，默认不开启。使用条件：Context targetRuntime="Mybatis3" ; javaClientGenerator
+        type="XMLMAPPER、MIXEDMAPPER"-->
+        <plugin type="com.meituan.mdp.mybatis.generator.plugins.LimitPlugin"/>
+        <!-- targetRuntime="Mybatis3"时需要，Example类存储路径 -->
+        <plugin type="com.meituan.mdp.mybatis.generator.plugins.ExampleTargetPlugin">
+            <property name="targetPackage" value="com.sankuai.avatar.web.dal.example"/>
+        </plugin>
+        <!-- 从数据库中的字段的comment做为生成entity的属性注释 -->
+        <commentGenerator type="com.meituan.mdp.mybatis.generator.internal.RemarksCommentGenerator">
+            <property name="suppressAllComments" value="true"/>
+            <property name="suppressDate" value="true"/>
+            <property name="addRemarkComments" value="true"/>
+        </commentGenerator>
+
+        <!--使用前替换数据库名,账号密码-->
+        <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+                        connectionURL="jdbc:mysql://10.84.238.199:5002/avatar_platform_web?characterEncoding=UTF8&amp;socketTimeout=60000&amp;allowMultiQueries=true"
+                        userId="avatar_platfoweb"
+                        password="dp!@1cavvfF9d">
+        </jdbcConnection>
+
+        <javaTypeResolver>
+            <property name="forceBigDecimals" value="false"/>
+        </javaTypeResolver>
+
+        <javaModelGenerator targetPackage="com.sankuai.avatar.web.dal.entity" targetProject="src/main/java">
+            <property name="enableSubPackages" value="true"/>
+            <property name="trimStrings" value="true"/>
+        </javaModelGenerator>
+
+        <sqlMapGenerator targetPackage="mappers" targetProject="src/main/resources">
+            <property name="enableSubPackages" value="true"/>
+        </sqlMapGenerator>
+
+        <javaClientGenerator type="XMLMAPPER" targetPackage="com.sankuai.avatar.web.dal.mapper" targetProject="src/main/java">
+            <property name="enableSubPackages" value="true"/>
+        </javaClientGenerator>
+
+        <!--配置需要生成的表-->
+<!--        <table tableName="user" domainObjectName="User">-->
+<!--        </table>-->
+<!--        <table tableName="servicewhitelist" domainObjectName="Whitelist">-->
+<!--        </table>-->
+        <table tableName="appkey_capacity" domainObjectName="Capacity">
+        </table>
+
+    </context>
+
+</generatorConfiguration>
